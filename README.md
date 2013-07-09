@@ -10,7 +10,7 @@ Install the gem, add your api key and set the current project.
 
 ```
   gem install lighthouse-cli
-  lighthouse -api_key your_key_here -current_project project_name_here
+  lighthouse -a your_key_here -c project_name_here
 ```
 
 Here are some commands to give you an idea of what it can do.
