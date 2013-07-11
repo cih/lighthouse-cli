@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
       require 'rubygems'
       require 'httparty'
-require_relative "../lib/Lighthouse/lighthouseapp-cli"
+require_relative "../lib/Lighthouse/lighthouse-cli"
 
 Lighthouse::CLI.start
