@@ -1,41 +1,6 @@
 #!/usr/bin/env ruby
+      require 'rubygems'
+      require 'httparty'
+require_relative "../lib/Lighthouse/lighthouseapp-cli"
 
-require_relative "../lib/Lighthouse/cli"
-
-CLI_CONFIG = YAML.load_file("#{File.expand_path('../../config/config.yml', __FILE__)}")
-
-Lighthouse.account = CLI_CONFIG["current_project"]
-Lighthouse.token = CLI_CONFIG["api_key"]
-options = {}
-
-OptionParser.new do |opts|
-  opts.on("-api_key String") do |api_key|
-    options[:api_key] = api_key
-  end
-
-  opts.on("-current_project String") do |current_project|
-    options[:current_project] = current_project
-  end
-
-  opts.on("-t String") do |t|
-    options[:ticket] = t
-  end
-
-  opts.on("-o") do |o|
-    options[:open] = o
-  end
-
-  opts.on("-s String") do |s|
-    options[:state] = s
-  end
-end.parse!
-
-if options[:api_key]
-  Lighthouse::CLI::Config.set_api_key(options[:api_key])
-end
-
-if options[:current_project]
-  Lighthouse::CLI::Config.set_current_project(options[:current_project])
-end
-
-Lighthouse::CLI::Output.new(options)
+Lighthouse::CLI.start

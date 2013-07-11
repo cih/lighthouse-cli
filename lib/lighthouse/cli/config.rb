@@ -1,10 +1,21 @@
 module Lighthouse
   module CLI
+
+    class << self
+      attr_accessor :token, :account, :project_id
+    end
+
+    CLI_CONFIG = YAML.load_file("#{File.expand_path('../../../../config/config.yml', __FILE__)}")
+
+    Lighthouse::CLI.account = CLI_CONFIG["account"]
+    Lighthouse::CLI.project_id = CLI_CONFIG["project_id"]
+    Lighthouse::CLI.token = CLI_CONFIG["token"]
+
     class Config
 
-      def self.set_api_key(api_key)
+      def self.set_token(token)
         settings = CLI_CONFIG
-        settings["api_key"] = api_key
+        settings["token"] = token
         save(settings)
       end
 
