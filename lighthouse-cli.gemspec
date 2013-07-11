@@ -17,9 +17,6 @@ Gem::Specification.new do |spec|
   spec.executables   = ["lighthouse"]
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "lighthouse-api", "~> 2.0"
-
   spec.add_development_dependency "bundler", "~> 1.2"
   spec.add_development_dependency "rake"
-  spec.add_development_dependency "addressable"
 end
