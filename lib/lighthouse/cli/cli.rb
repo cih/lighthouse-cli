@@ -39,60 +39,67 @@ module Lighthouse
         `open `
       end
 
+      AVAILABLE_COMMANDS = self.instance_methods(false)
+
       def start
         @method = ARGV[0]
         @ticket_id = ARGV[1]
         @project_id = Lighthouse::CLI.project_id
 
-        self.send(@method.to_sym)
+        if @method
+          if self.respond_to?(@method.to_sym)
+            self.send(@method.to_sym)
+          else
+            puts "** ERROR #{@method} is not a valid command, type `lighthouse help` for a full list of commands **"
+          end
+        else
+          puts "** ERROR Please givae a valid command, type `lighthouse help` for a full list of commands **"
+        end
       end
 
       def help
         puts "Welcome to Lighthouse CLI version #{Lighthouse::CLI::VERSION} \n".green
         puts "DESCRIPTION\n".yellow
         puts <<-EOF
-    Show, list and update tickets without leaving the command line.\n
-        EOF
+        Show, list and update tickets without leaving the command line.\n
+            EOF
 
-        puts "USAGE\n".yellow
+            puts "USAGE\n".yellow
 
-        puts <<-EOF
-    lighthouse [action] [options]
-
-
-    CONFIG - This stores your settings in a config.yml file
-
-        lighthouse config [options]
-
-          -t <api_token> # Set your lighthouse api token
-
-          -p <project_id> # Set the current project
-
-          -a <account_name> # Set the account name
-
-    TICKETS - Show, list and update tickets
-
-        lighthouse show <ticket_number> # Returns the ticket
-
-        lighthouse update <ticket_number> [options]
-
-          -s <new_state> # Update the state of the ticket
-
-          -a <assigned_user> # Update the assigned user
-
-    PROJECTS - List projects
-
-        lighthouse projects # List projects
-
-        lighthouse project <project_number> # Shows current project
-
-    USERS
-
-        lighthouse users #
+            puts <<-EOF
+        lighthouse [action] [options]
 
 
+        CONFIG - This stores your settings in a config.yml file
 
-        EOF
+            lighthouse config [options]
+
+              -t <api_token> # Set your lighthouse api token
+
+              -p <project_id> # Set the current project
+
+              -a <account_name> # Set the account name
+
+        TICKETS - Show, list and update tickets
+
+            lighthouse show <ticket_number> # Returns the ticket
+
+            lighthouse update <ticket_number> [options]
+
+              -s <new_state> # Update the state of the ticket
+
+              -a <assigned_user> # Update the assigned user
+
+        PROJECTS - List projects
+
+            lighthouse projects # List projects
+
+            lighthouse project <project_number> # Shows current project
+
+        USERS
+
+            lighthouse users #
+            EOF
       end
 
       def config
