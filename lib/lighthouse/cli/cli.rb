@@ -47,6 +47,54 @@ module Lighthouse
         self.send(@method.to_sym)
       end
 
+      def help
+        puts "Welcome to Lighthouse CLI version #{Lighthouse::CLI::VERSION} \n".green
+        puts "DESCRIPTION\n".yellow
+        puts <<-EOF
+    Show, list and update tickets without leaving the command line.\n
+        EOF
+
+        puts "USAGE\n".yellow
+
+        puts <<-EOF
+    lighthouse [action] [options]
+
+
+    CONFIG - This stores your settings in a config.yml file
+
+        lighthouse config [options]
+
+          -t <api_token> # Set your lighthouse api token
+
+          -p <project_id> # Set the current project
+
+          -a <account_name> # Set the account name
+
+    TICKETS - Show, list and update tickets
+
+        lighthouse show <ticket_number> # Returns the ticket
+
+        lighthouse update <ticket_number> [options]
+
+          -s <new_state> # Update the state of the ticket
+
+          -a <assigned_user> # Update the assigned user
+
+    PROJECTS - List projects
+
+        lighthouse projects # List projects
+
+        lighthouse project <project_number> # Shows current project
+
+    USERS
+
+        lighthouse users #
+
+
+
+        EOF
+      end
+
       # GET /projects/#{project_id}/tickets/#{number}.xml
       #
       def show
@@ -54,18 +102,22 @@ module Lighthouse
 
         response = Lighthouse::CLI::Request.perform(:get, endpoint)
 
-        doc = REXML::Document.new(response.body)
-        doc.elements.each('ticket') do |p|
-          puts "Title    : #{p.elements["title"].text}"
-          puts "State    : #{p.elements["state"].text}"
-          puts "Updated  : #{p.elements["updated-at"].text}"
-          puts "Url      : #{p.elements["url"].text}"
-          puts "Body     : #{p.elements["latest-body"].text}"
-        end
+        if response.code == 200
+          doc = REXML::Document.new(response.body)
+          doc.elements.each('ticket') do |p|
+            puts "Title    : #{p.elements["title"].text}"
+            puts "State    : #{p.elements["state"].text}"
+            puts "Updated  : #{p.elements["updated-at"].text}"
+            puts "Url      : #{p.elements["url"].text}"
+            puts "Body     : #{p.elements["latest-body"].text}"
+          end
 
-        doc.elements.each('ticket/versions/version') do |v|
-          next if v.elements["body"].attributes["nil"] # NEED TO SKIP 1ST
-          puts "Comment  : #{v.elements["body"].text}"
+          doc.elements.each('ticket/versions/version') do |v|
+            next if v.elements["body"].attributes["nil"] # NEED TO SKIP 1ST
+            puts "Comment  : #{v.elements["body"].text}"
+          end
+        else
+          puts "** ERROR - Is #{@ticket_id} a valid ticket number? **"
         end
       end
 
