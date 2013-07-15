@@ -14,6 +14,10 @@ module Lighthouse
           @@options[:current_project] = current_project
         end
 
+        opts.on("-q String") do |query|
+          @@options[:custom_query] = query
+        end
+
         opts.on("-o") do |o|
           @@options[:open] = o
         end

@@ -11,9 +11,15 @@ module Lighthouse
 
         if method.to_sym == :get
           array = []
+          array << options.delete(:custom_query)
+
+          # Build the format of query params for the lighthouse api
+          # eg q=state:new responsible:me
+          #
           options.each_pair do |k, v|
             array << "#{k}:#{v}"
           end
+
           options.merge!(:q => array.join(" "))
 
           HTTParty.send(method.to_sym, url,
