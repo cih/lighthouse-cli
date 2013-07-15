@@ -29,14 +29,26 @@ module Lighthouse
         opts.on("-c String") do |s|
           @@options[:body] = s
         end
+
+        opts.on("-n String") do |n|
+          @@options[:nickname] = n
+        end
+
+        opts.on("-u String") do |u|
+          @@options[:user_id] = u
+        end
+
+        opts.on("-a String") do |a|
+          @@options[:assigned_user_id] = a
+        end
       end.parse!
 
       if @@options[:api_key]
-        Lighthouse::CLI::Config.set_api_key(options.delete(:api_key))
+        Lighthouse::CLI::Config.save_setting(:api_key, options.delete(:api_key))
       end
 
       if @@options[:current_project]
-        Lighthouse::CLI::Config.set_current_project(options.delete(:current_project))
+        Lighthouse::CLI::Config.save_setting(:current_project, options.delete(:current_project))
       end
 
       if @@options[:open]
@@ -90,7 +102,7 @@ module Lighthouse
 
               -s <new_state> # Update the state of the ticket
 
-              -a <assigned_user> # Update the assigned user
+              -a <assigned_user> # Update the assigned user (by ID or nickname)
 
         PROJECTS - List projects
 
@@ -98,9 +110,11 @@ module Lighthouse
 
             lighthouse project <project_number> # Shows current project
 
-        USERS
+        USERS - Show users assigned to the current project
 
-            lighthouse users #
+            lighthouse users # Shows all users
+
+            lighthouse users -u 12345 -n cholmes # Assign nickname 'cholmes' to user #12345
             EOF
       end
 
@@ -157,6 +171,13 @@ module Lighthouse
       def update
         endpoint = "/projects/#{@project_id}/tickets/#{@ticket_id}.xml"
 
+        @@options[:assigned_user_id] = find_user(@@options[:assigned_user_id]) if @@options[:assigned_user_id]
+
+        if @@options[:assigned_user_id].nil?
+          puts "Unknown user".red
+          exit
+        end
+
         response = Lighthouse::CLI::Request.perform(:put, endpoint, @@options)
 
         if response.code == 200
@@ -201,6 +222,59 @@ module Lighthouse
         doc.elements.each('project') do |p|
           puts "#{p.elements["id"].text} #{p.elements["name"].text}, #{p.elements["open-tickets-count"].text} open tickets."
         end
+      end
+
+
+      # GET /users.xml
+      #
+      def users
+        # Grab the user list from the API if not already cached
+        if Lighthouse::CLI.project_users.nil?
+          endpoint = "/projects/#{@project_id}/memberships.xml"
+          response = Lighthouse::CLI::Request.perform(:get, endpoint)
+          doc = REXML::Document.new(response.body)
+
+          users = {}
+          doc.elements.each('memberships/membership/user') do |user|
+            users[user.elements["id"].text.to_sym] = {
+              :name => user.elements["name"].text.strip,
+              :nickname => nil
+            }
+          end
+
+          Lighthouse::CLI.project_users = users
+          Lighthouse::CLI::Config.save_setting(:project_users, users)
+        end
+
+        users = Lighthouse::CLI.project_users
+
+        if @@options[:user_id] && @@options[:nickname]
+          users[@@options[:user_id].to_sym][:nickname] = @@options[:nickname]
+          Lighthouse::CLI.project_users = users
+          Lighthouse::CLI::Config.save_setting(:project_users, users)
+        end
+
+        users = Lighthouse::CLI.project_users
+        puts "ID\tName\tNickname"
+        users.each_pair do |user_id, details|
+          puts "#{user_id}\t#{details[:name]}\t#{details[:nickname]}"
+        end
+      end
+
+
+      def find_user(query)
+        # Finds a user from the config either by ID or nickname
+        users = Lighthouse::CLI.project_users
+
+        if query.to_i > 0
+          return query.to_i if users.has_key?(query.to_sym)
+        else
+          users.each_pair do |id, user|
+            return id.to_s.to_i if user[:nickname] == query
+          end
+        end
+
+        nil
       end
 
     end
