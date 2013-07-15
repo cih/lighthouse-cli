@@ -39,8 +39,6 @@ module Lighthouse
         `open `
       end
 
-      AVAILABLE_COMMANDS = self.instance_methods(false)
-
       def start
         @method = ARGV[0]
         @ticket_id = ARGV[1]
@@ -53,7 +51,7 @@ module Lighthouse
             puts "** ERROR #{@method} is not a valid command, type `lighthouse help` for a full list of commands **"
           end
         else
-          puts "** ERROR Please givae a valid command, type `lighthouse help` for a full list of commands **"
+          puts "** ERROR Please give a valid command, type `lighthouse help` for a full list of commands **"
         end
       end
 
@@ -129,6 +127,24 @@ module Lighthouse
           end
         else
           puts "** ERROR - Is #{@ticket_id} a valid ticket number? **"
+        end
+      end
+
+      # GET /projects/#{project_id}/tickets.xml
+      #
+      def list
+        puts @@options
+        endpoint = "/projects/#{@project_id}/tickets.xml"
+
+        response = Lighthouse::CLI::Request.perform(:get, endpoint, @@options)
+
+        if response.code == 200
+          doc = REXML::Document.new(response.body)
+          doc.elements.each('tickets/ticket') do |p|
+            puts "#{p.elements["state"].text}    : #{p.elements["title"].text}"
+          end
+        else
+          puts "** ERROR **"
         end
       end
 
