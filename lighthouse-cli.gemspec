@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Chris Holmes"]
   spec.email         = ["tochrisholmes@gmail.com"]
   spec.description   = %q{A lightweight and simple CLI for interacting with Lighthouse.}
-  spec.summary       = %q{This is wrapper around the lightouse-api gem. Show, list and update tickets without leaving the command line.}
+  spec.summary       = %q{Show, list and update tickets without leaving the command line.}
   spec.homepage      = ""
   spec.license       = "MIT"
 
