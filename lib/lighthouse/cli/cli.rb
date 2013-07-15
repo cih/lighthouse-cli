@@ -95,6 +95,10 @@ module Lighthouse
         EOF
       end
 
+      def config
+        CLI_CONFIG.each_pair {|k, v| puts "#{k} : #{v}"}
+      end
+
       # GET /projects/#{project_id}/tickets/#{number}.xml
       #
       def show
