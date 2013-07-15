@@ -153,6 +153,11 @@ module Lighthouse
 
         @@options[:assigned_user_id] = find_user(@@options[:assigned_user_id]) if @@options[:assigned_user_id]
 
+        if @@options[:assigned_user_id].nil?
+          puts "Unknown user".red
+          exit
+        end
+
         response = Lighthouse::CLI::Request.perform(:put, endpoint, @@options)
 
         if response.code == 200
